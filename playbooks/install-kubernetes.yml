@@ -1,0 +1,31 @@
+- hosts: all
+  become: yes
+  become_user: root
+  vars:
+     packages:
+       - vim
+       - wget
+       - software-properties-common
+       - autofs
+       - ca-certificates
+       - docker.io
+       - kubelet
+       - kubeadm
+       - kubernetes-cni
+
+  tasks:
+    - name: Install transport https
+      command: apt-get install -y apt-transport-https
+
+    - name: Add key for kubernetes
+      shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+    - name: Tee kubernetes list
+      shell: echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+
+    - name: Update apt get
+      command: sudo apt-get update
+
+    - name: Install Packages
+      apt: name={{ item }} state=latest
+      with_items: "{{ packages }}"
